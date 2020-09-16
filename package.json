@@ -1,0 +1,22 @@
+{
+  "name": "pwa-compliance-control",
+  "version": "1.0.0",
+  "description": "Compliance Control",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server -c-1"
+  },
+  "keywords": [
+    "pwa",
+    "progressive",
+    "web",
+    "app",
+    "complete",
+    "tutorial"
+  ],
+  "author": "Oliver Banse",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^0.12.3"
+  }
+}
