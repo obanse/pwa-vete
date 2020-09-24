@@ -1,4 +1,10 @@
 
+var deferredPrompt;
+
+if (!window.Promise) {
+    window.Promise = Promise;
+}
+
 /**
  * register Service Worker
  */
