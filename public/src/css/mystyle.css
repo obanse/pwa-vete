@@ -1,0 +1,7 @@
+:root {
+    --main-amk-green: #76b856;
+}
+
+.mdl-layout__header {
+    background-color: var(--main-amk-green);
+}
