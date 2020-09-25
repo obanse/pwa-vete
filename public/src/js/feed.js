@@ -7,14 +7,17 @@ function openCreatePostModal() {
   createPostArea.style.display = 'block';
   if (deferredPrompt) {
     deferredPrompt.prompt();
+
     deferredPrompt.userChoice.then(function (choiceResult) {
       console.log(choiceResult.outcome);
+
       if (choiceResult.outcome === 'dismissed') {
         console.log('User cancelled installation');
       } else {
         console.log('User added to home screen');
       }
     });
+
     deferredPrompt = null;
   }
 }
@@ -40,6 +43,12 @@ function onSaveButtonClicked(event) {
         });
   }
 } */
+
+function clearCards() {
+  while (sharedMomentsArea.hasChildNodes()) {
+    sharedMomentsArea.removeChild(sharedMomentsArea.lastChild);
+  }
+}
 
 function createCard() {
   const cardWrapper = document.createElement('div');
@@ -68,10 +77,32 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
-fetch('https://httpbin.org/get')
-  .then(function (res) {
+let url = 'https://httpbin.org/get';
+let webDataReceived = false;
+
+fetch(url)
+  .then(res => {
     return res.json();
   })
-  .then(function (data) {
+  .then(data => {
+    webDataReceived = true;
+    console.log('From Web', data);
+    clearCards();
     createCard();
-  });
+  })
+  .catch(err => {
+    console.log('Network failed for', url);
+  })
+
+if ('caches' in window) {
+  caches.match(url)
+      .then(res => {
+        if (res)
+          return res.json();
+      })
+      .then(data => {
+        console.log('From Cache', data);
+        if (!webDataReceived)
+          createCard();
+      })
+}
