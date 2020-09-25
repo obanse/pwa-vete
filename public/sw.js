@@ -1,5 +1,5 @@
-const CACHE_STATIC = 'static-v2';
-const CACHE_DYNAMIC = 'dynamic-v1';
+const CACHE_STATIC = 'static-v5';
+const CACHE_DYNAMIC = 'dynamic-v2';
 
 /**
  * install Service Worker and activate static caching
@@ -13,6 +13,7 @@ self.addEventListener('install', function (event) {
             return cache.addAll([
                 '/',
                 '/index.html',
+                '/offline.html',
                 '/src/js/app.js',
                 '/src/js/feed.js',
                 '/src/js/promise.js',
@@ -75,6 +76,12 @@ self.addEventListener('fetch', function (event) {
                                     // because it will be consumed
                                     cache.put(event.request.url, response.clone());
                                     return response;
+                                })
+                        })
+                        .catch(err => {
+                            return caches.open(CACHE_STATIC)
+                                .then(cache => {
+                                    return cache.match('/offline.html');
                                 })
                         });
                 }
