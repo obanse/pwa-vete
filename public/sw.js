@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.min.js');
 importScripts('/src/js/indexedDB.js');
 
-const STATIC_CACHE = 'static-v24';
+const STATIC_CACHE = 'static-v25';
 const DYNAMIC_CACHE = 'dynamic-v2';
 const STATIC_FILES = [
     '/',
