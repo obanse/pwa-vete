@@ -20,6 +20,18 @@ function openCreatePostModal() {
 
     deferredPrompt = null;
   }
+
+  /**
+   * unregister all service workers by clicking the button to create new cards
+   */
+  // if ('serviceWorker' in navigator) {
+  //   navigator.serviceWorker.getRegistrations()
+  //       .then(regList => {
+  //         for (let i = 0; i < regList.length; i++) {
+  //           regList[i].unregister();
+  //         }
+  //       })
+  // }
 }
 
 function closeCreatePostModal() {
@@ -30,19 +42,22 @@ shareImageButton.addEventListener('click', openCreatePostModal);
 
 closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 
-/* use caching on demand sample
-function onSaveButtonClicked(event) {
-  console.log('clicked');
-  if ('caches' in window) {
-    caches.open('user-requested')
-        .then(cache => {
-          cache.addAll([
-              'https://httpbin.org/get',
-              '/src/images/sf-boat.jpg'
-          ]);
-        });
-  }
-} */
+/**
+ * use caching on demand sample
+ * @param event
+ */
+// function onSaveButtonClicked(event) {
+//   console.log('clicked');
+//   if ('caches' in window) {
+//     caches.open('user-requested')
+//         .then(cache => {
+//           cache.addAll([
+//               'https://httpbin.org/get',
+//               '/src/images/sf-boat.jpg'
+//           ]);
+//         });
+//   }
+// }
 
 function clearCards() {
   while (sharedMomentsArea.hasChildNodes()) {
@@ -50,23 +65,23 @@ function clearCards() {
   }
 }
 
-function createCard() {
+function createCard(data) {
   const cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
   const cardTitle = document.createElement('div');
   cardTitle.className = 'mdl-card__title';
-  cardTitle.style.backgroundImage = 'url("/src/images/sf-boat.jpg")';
+  cardTitle.style.backgroundImage = 'url(' + data.image + ')';
   cardTitle.style.backgroundSize = 'cover';
   cardTitle.style.height = '180px';
   cardWrapper.append(cardTitle);
   const cardTitleTextElement = document.createElement('h2');
   cardTitleTextElement.style.color = 'white';
   cardTitleTextElement.className = 'mdl-card__title-text';
-  cardTitleTextElement.textContent = 'San Francisco Trip';
+  cardTitleTextElement.textContent = data.title;
   cardTitle.appendChild(cardTitleTextElement);
   const cardSupportingText = document.createElement('div');
   cardSupportingText.className = 'mdl-card__supporting-text';
-  cardSupportingText.textContent= 'In San Francisco';
+  cardSupportingText.textContent= data.location;
   cardSupportingText.style.textAlign = 'center';
   // const cardSaveButton = document.createElement('button');
   // cardSaveButton.textContent = 'Save';
@@ -77,7 +92,14 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
-let url = 'https://httpbin.org/get';
+function updateUI(data) {
+  clearCards();
+  for (let i = 0; i < data.length; i++) {
+    createCard(data[i]);
+  }
+}
+
+let url = 'https://amk-cc.firebaseio.com/posts.json';
 let webDataReceived = false;
 
 fetch(url)
@@ -87,22 +109,22 @@ fetch(url)
   .then(data => {
     webDataReceived = true;
     console.log('From Web', data);
-    clearCards();
-    createCard();
+    let dataArray = [];
+    for (let key in data) {
+      dataArray.push(data[key]);
+    }
+    updateUI(dataArray);
   })
   .catch(err => {
     console.log('Network failed for', url);
   })
 
-if ('caches' in window) {
-  caches.match(url)
-      .then(res => {
-        if (res)
-          return res.json();
-      })
+if ('indexedDB' in window) {
+  readAllData('posts')
       .then(data => {
-        console.log('From Cache', data);
-        if (!webDataReceived)
-          createCard();
-      })
+        if (!webDataReceived) {
+          console.log('From Cache', data);
+          updateUI(data);
+        }
+      });
 }
