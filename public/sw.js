@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.min.js');
 importScripts('/src/js/indexedDB.js');
 
-const STATIC_CACHE = 'static-v25';
+const STATIC_CACHE = 'static-v26';
 const DYNAMIC_CACHE = 'dynamic-v2';
 const STATIC_FILES = [
     '/',
@@ -240,3 +240,38 @@ self.addEventListener('fetch', function (event) {
 //     );
 // });
 
+self.addEventListener('sync', event => {
+    console.log('[Service Worker] Background syncing', event);
+    if (event.tag === 'sync-new-posts') {
+        console.log('[Service Worker] Syncing new Posts');
+        event.waitUntil(
+            readAllData('sync-posts')
+                .then(data => {
+                    for (let dt of data) {
+                        fetch('https://amk-cc.firebaseio.com/posts.json', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                id: dt.id,
+                                title: dt.title,
+                                location: dt.location,
+                                image: 'http://lorempixel.com/400/200/people'
+                            })
+                        })
+                            .then(res => {
+                                console.log('Send data', res);
+                                if (res.ok) {
+                                    deleteItem('sync-posts', dt.id);
+                                }
+                            })
+                            .catch(err => {
+                                console.log('Error while sending data', err);
+                            });
+                    }
+                })
+        );
+    }
+});

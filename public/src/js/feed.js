@@ -2,6 +2,9 @@ const shareImageButton = document.querySelector('#share-image-button');
 const createPostArea = document.querySelector('#create-post');
 const closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 const sharedMomentsArea = document.querySelector('#shared-moments');
+const form = document.querySelector('form');
+let titleInput = document.querySelector('#title');
+let locationInput = document.querySelector('#location');
 
 function openCreatePostModal() {
   // createPostArea.style.display = 'block';
@@ -131,3 +134,57 @@ if ('indexedDB' in window) {
         }
       });
 }
+
+form.addEventListener('submit', event => {
+  event.preventDefault();
+
+  if (titleInput.value.trim() === '' || locationInput.value.trim() === '') {
+    alert('Please enter valid data!');
+    return;
+  }
+
+  closeCreatePostModal();
+
+  function sendData() {
+    fetch('https://amk-cc.firebaseio.com/posts.json', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        id: new Date().toISOString(),
+        title: titleInput.value,
+        location: locationInput.value,
+        image: 'http://lorempixel.com/400/200/people'
+      })
+    })
+        .then(res => {
+          console.log('Send data', res);
+          updateUI();
+        });
+  }
+
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready
+        .then(sw => {
+          let post = {
+            id: new Date().toISOString(),
+            title: titleInput.value,
+            location: locationInput.value
+          };
+          writeData('sync-posts', post)
+              .then(() => {
+                return sw.sync.register('sync-new-posts');
+              })
+              .then(() => {
+                let snackbarContainer = document.querySelector('#confirmation-toast');
+                let data = { message: 'Your Post was saved for syncing!' };
+                snackbarContainer.MaterialSnackbar.showSnackbar(data);
+              });
+        })
+  } else {
+    sendData();
+  }
+
+});
