@@ -118,7 +118,7 @@ self.addEventListener('fetch', function (event) {
                     })
                     .then(data => {
                         for (let key in data) {
-                            writeData('posts', data[key]);
+                            writeData('posts', data[key])
                         }
                     });
 
