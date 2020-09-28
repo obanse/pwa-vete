@@ -1,6 +1,12 @@
+require('dotenv').config();
 
 const MongoClient = require('mongodb').MongoClient;
-const uri = "mongodb+srv://mongodb_amk:UHfoDt0WMxgN@clusteramk.euws8.mongodb.net/posts-store?retryWrites=true&w=majority";
+const uri = 'mongodb+srv://'
+    + process.env.MONGO_USER + ':'
+    + process.env.MONGO_PASS + '@'
+    + process.env.MONGO_SRV + '/'
+    + process.env.MONGO_DB + '?retryWrites=true&w=majority';
+console.log(uri);
 const client = new MongoClient(uri, { useNewUrlParser: true });
 
 client.connect(err => {
