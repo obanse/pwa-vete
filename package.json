@@ -4,7 +4,8 @@
   "description": "Compliance Control",
   "main": "index.js",
   "scripts": {
-    "start": "http-server -c-1"
+    "start": "http-server -c-1",
+    "go": "node server.js"
   },
   "keywords": [
     "pwa",
